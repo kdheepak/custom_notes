@@ -56,9 +56,10 @@ def custom_notes(key, value, fmt, meta):
         walk(value, action, fmt, meta)
         if store:
             v = convert_note_to_element_type(store)
-            v.insert(0, {'t': 'Para',
-                'c': value})
-            return v
+            if v is not None:
+                v.insert(0, {'t': 'Para',
+                    'c': value})
+                return v
 
 if __name__ == "__main__":
     toJSONFilter(custom_notes)
