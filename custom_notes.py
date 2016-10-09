@@ -13,10 +13,14 @@ from __future__ import print_function
 
 from pandocfilters import walk, toJSONFilter
 
+count = 0
+
 
 def custom_notes(key, value, fmt, meta):
 
     store = dict()
+
+    global count
 
     def convert_note_to_element_type(store):
         value = store['store']
@@ -50,7 +54,10 @@ def custom_notes(key, value, fmt, meta):
             store['store'] = value
 
     if key == 'Note':
-        return []
+        count = count + 1
+        return {"c": [
+            ["aside-{}".format(count - 1), [], []], []], "t": "Span"
+        }
 
     if key == 'Para':
         walk(value, action, fmt, meta)
