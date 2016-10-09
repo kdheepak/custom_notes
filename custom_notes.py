@@ -13,16 +13,20 @@ from __future__ import print_function
 
 from pandocfilters import walk, toJSONFilter
 
-count = 0
+span_count = 0
+tag_count = 0
+element_type = 'aside'
 
 
 def custom_notes(key, value, fmt, meta):
 
     store = dict()
 
-    global count
+    global span_count
 
     def convert_note_to_element_type(store):
+        global tag_count
+        global element_type
         value = store['store']
 
         if value[0]['c'][0]['t'] == u'Strong':
@@ -40,8 +44,9 @@ def custom_notes(key, value, fmt, meta):
 
             value.insert(0, {
                 "t": "RawBlock",
-                "c": ['html', "<{}>".format(element_type)]
+                "c": ['html', "<{} id=\"{}-{}\">".format(element_type, element_type, tag_count)]
             })
+            tag_count = tag_count + 1
             value.append({
                 "t": "RawBlock",
                 "c": ['html', "</{}>".format(element_type)]
@@ -54,9 +59,9 @@ def custom_notes(key, value, fmt, meta):
             store['store'] = value
 
     if key == 'Note':
-        count = count + 1
+        span_count = span_count + 1
         return {"c": [
-            ["aside-{}".format(count - 1), [], []], []], "t": "Span"
+            ["{}-{}".format(element_type, span_count - 1), [], []], []], "t": "Span"
         }
 
     if key == 'Para':
