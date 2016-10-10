@@ -11,6 +11,8 @@ License : BSD 3-Clause
 
 from __future__ import print_function
 
+# import sys
+from copy import deepcopy
 from pandocfilters import walk, toJSONFilter
 
 span_count = 0
@@ -20,6 +22,8 @@ element_type = 'aside'
 
 def custom_notes(key, value, fmt, meta):
 
+    # sys.stderr.write('\n\n' + str(key) + '\t' + str(value) + '\n\n')
+
     store = dict()
 
     global span_count
@@ -27,7 +31,7 @@ def custom_notes(key, value, fmt, meta):
     def convert_note_to_element_type(store):
         global tag_count
         global element_type
-        value = store['store']
+        value = deepcopy(store['store'])
 
         if value[0]['c'][0]['t'] == u'Strong':
             raw = value[0]['c'].pop(0)
@@ -59,15 +63,22 @@ def custom_notes(key, value, fmt, meta):
             store['store'] = value
 
     if key == 'Note':
-        span_count = span_count + 1
-        return {"c": [
-            ["{}-{}".format(element_type, span_count - 1), [], []], []], "t": "Span"
-        }
+        if value[0]['c'][0]['t'] == 'Strong':
+            return {"c": [
+                ["{}-{}".format(element_type, span_count - 1), [], []], []], "t": "Span"
+            }
+        else:
+            pass
 
     if key == 'Para':
         walk(value, action, fmt, meta)
+        # sys.stderr.write('Walking down Para\n')
         if store:
+            # sys.stderr.write('Found a Note in Para\n')
             v = convert_note_to_element_type(store)
+            # sys.stderr.write('Converted the Note\n')
+            # sys.stderr.write(repr(store['store']) + '\n')
+            # sys.stderr.write(repr(v) + '\n')
             if v is not None:
                 v.insert(0, {'t': 'Para',
                     'c': value})
