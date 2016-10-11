@@ -64,6 +64,7 @@ def custom_notes(key, value, fmt, meta):
 
     if key == 'Note':
         if value[0]['c'][0]['t'] == 'Strong':
+            span_count = span_count + 1
             return {"c": [
                 ["{}-{}".format(element_type, span_count - 1), [], []], []], "t": "Span"
             }
